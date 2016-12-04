@@ -1,0 +1,24 @@
+{
+  "name": "strava-to-kml",
+  "version": "1.0.0",
+  "description": "A file parser for converting Strava activity JSON files to KML.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kkeuter/strava-to-kml.git"
+  },
+  "author": "Kwin Keuter",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kkeuter/strava-to-kml/issues"
+  },
+  "homepage": "https://github.com/kkeuter/strava-to-kml#readme",
+  "dependencies": {
+    "geojson": "^0.4.0",
+    "polyline": "^0.2.0",
+    "tokml": "^0.4.0"
+  }
+}
