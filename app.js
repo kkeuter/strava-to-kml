@@ -3,30 +3,47 @@ var GeoJSON = require('geojson');
 var tokml = require('tokml');
 var fs = require('fs');
 
+var features = [],
+	activityDict = [],
+	duplicates = 0,
+	noPolys = 0;
 
-var stravaFile = fs.readFileSync("activities.json");
-var activities = JSON.parse(stravaFile);
-var features = [];
+var dir = 'data/strava';
 
-activities.forEach(function(activity) {
+fs.readdirSync(dir).forEach(function(fileName, index) {
 
-	if (activity.map.summary_polyline && activity.map.summary_polyline.length > 0) {
-		// returns an array of lat, lng pairs (y,x)
-		var decodedArray = polyline.decode(activity.map.summary_polyline);
-		var xyPoints = [];
+	var file = fs.readFileSync(dir + '/' + fileName);
+	var activities = JSON.parse(file);
 
-		// re-order coordinates into (x,y) format
-		decodedArray.forEach(function(point, i) {
-			xyPoints.push([point[1],point[0]]);
-		});
+	activities.forEach(function(activity, i) {
 
-		features.push({ 'line': xyPoints});
-	}
+		if (activityDict[activity.id] === undefined) {
+
+			if (activity.map.summary_polyline && activity.map.summary_polyline.length > 0) {
+				// returns an array of lat, lng pairs (y,x)
+				var decodedArray = polyline.decode(activity.map.summary_polyline);
+				var xyPoints = [];
+
+				// re-order coordinates into (x,y) format
+				decodedArray.forEach(function(point, i) {
+					xyPoints.push([point[1],point[0]]);
+				});
+
+				features.push({ 'line': xyPoints});
+				activityDict[activity.id] = 1;
+			}
+			else noPolys++;
+		}
+		else duplicates++;
+	});
 });
 
+// convert JSON --> geoJSON --> kml
 var lineString = GeoJSON.parse(features, {'LineString' : 'line'});
 var kml = tokml(lineString);
 
-console.log(features.length + ' activities processed');
-
 fs.writeFileSync('activities.kml', kml);
+
+console.log(features.length + ' unique activities processed');
+console.log(duplicates + ' duplicate activities found');
+console.log(noPolys + ' activities were missing map data');
